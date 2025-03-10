@@ -23,7 +23,6 @@ def read_initial_state_from_file(filename):
     return tuple(tuple(row) for row in gameMap), None, None
 
 
-# print(read_initial_state_from_file('assignment1config.txt'))
 
 
 
@@ -94,19 +93,56 @@ class ZenPuzzleGarden(Problem):
         # Task 2
         # Return a boolean value indicating if a given state is solved.
         # Replace the line below with your code.
+        map = state[0]
+        height = len(map)
+        width = len(map[0])
+        for i in range(height):
+            for j in range(width):
+                if not map[i][j]:
+                    return False
+        return True
         raise NotImplementedError
 
 # Task 3
 # Implement an A* heuristic cost function and assign it to the variable below.
-astar_heuristic_cost = None
+def astar_heuristic_cost(node):
+    map = node.state[0]
+    height = len(map)
+    width = len(map[0])
+    rock_positions = []
+    for i in range(height):
+        for j in range(width):
+            if map[i][j] == 'rock':
+                rock_positions.append((i, j))
+    return sum(min(abs(rock[0] - rock_position[0]) + abs(rock[1] - rock_position[1]) for rock in rock_positions) for rock_position in rock_positions)
+# astar_heuristic_cost = 
+
+
 
 def beam_search(problem, f, beam_width):
     # Task 4
     # Implement a beam-width version A* search.
     # Return a search node containing a solved state.
     # Experiment with the beam width in the test code to find a solution.
-    # Replace the line below with your code.
-    raise NotImplementedError
+    # Replace the line below with your code. make a beam-width version of A* search
+
+    node = Node(problem.initial)
+    frontier = [node]
+    while frontier:
+        new_frontier = []
+        for node in frontier:
+            for action in problem.actions(node.state):
+                child = node.child_node(problem, action)
+                if problem.goal_test(child.state):
+                    return child
+                new_frontier.append(child)
+        new_frontier.sort(key=f)
+        frontier = new_frontier[:beam_width]
+    return None
+
+
+
+
 
 if __name__ == "__main__":
 
@@ -115,7 +151,6 @@ if __name__ == "__main__":
     visualise(read_initial_state_from_file('assignment1config.txt'))
 
     # Task 2 test code
-    '''
     garden = ZenPuzzleGarden('assignment1config.txt')
     print('Running breadth-first graph search.')
     before_time = time()
@@ -127,10 +162,8 @@ if __name__ == "__main__":
         animate(node)
     else:
         print('No solution was found.')
-    '''
 
     # Task 3 test code
-    '''
     print('Running A* search.')
     before_time = time()
     node = astar_search(garden, astar_heuristic_cost)
@@ -141,10 +174,8 @@ if __name__ == "__main__":
         animate(node)
     else:
         print('No solution was found.')
-    '''
 
     # Task 4 test code
-    '''
     print('Running beam search.')
     before_time = time()
     node = beam_search(garden, lambda n: n.path_cost + astar_heuristic_cost(n), 50)
@@ -155,4 +186,3 @@ if __name__ == "__main__":
         animate(node)
     else:
         print('No solution was found.')
-    '''
